@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>StudyAgent · 化学</title>
+
+    <!-- iOS PWA install: web-app-capable + status-bar style. Pinned at top
+         because Safari only honours these meta tags before first paint. -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="StudyAgent" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0e0e10" />
+
+    <!-- Tailwind from CDN: fine for MVP, swap to a real build pipeline later
+         once the design stabilises. KaTeX with the mhchem extension renders
+         化学方程式 like \ce{2H2 + O2 -> 2H2O} natively. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+      crossorigin="anonymous"
+    />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/mhchem.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+    <!-- Marked: render the LLM's markdown reply (lists, bold, etc.). -->
+    <script defer src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script defer src="/assets/main.js"></script>
+
+    <style>
+      /* Tap-to-focus camera button on iOS Safari needs an explicit min size,
+         44pt is Apple's HIG hit-target recommendation. */
+      .tap-target { min-height: 44px; min-width: 44px; }
+      body { background: #0e0e10; color: #e8e8ea; }
+    </style>
+  </head>
+  <body class="antialiased font-sans">
+    <main x-data="chemApp" class="max-w-2xl mx-auto px-4 pt-6 pb-32">
+      <header class="flex items-center justify-between mb-6">
+        <div>
+          <div class="text-lg font-semibold tracking-tight">StudyAgent</div>
+          <div class="text-xs text-neutral-500">化学辅导 · 高二</div>
+        </div>
+        <button
+          class="tap-target rounded-full bg-neutral-800 px-3 text-sm"
+          @click="reset()"
+          x-show="messages.length > 0"
+        >
+          新一题
+        </button>
+      </header>
+
+      <!-- Empty state: friendly invitation to upload a photo or type. -->
+      <section x-show="messages.length === 0" class="mt-12">
+        <div class="text-center text-neutral-400 mb-8">
+          拍一张化学题或者直接打字问我。
+        </div>
+      </section>
+
+      <!-- Conversation -->
+      <section class="space-y-4">
+        <template x-for="(msg, i) in messages" :key="i">
+          <article
+            class="rounded-2xl p-4"
+            :class="msg.role === 'user' ? 'bg-neutral-800/60' : 'bg-neutral-900 border border-neutral-800'"
+          >
+            <!-- User photo -->
+            <template x-if="msg.role === 'user' && msg.image">
+              <img :src="msg.image" class="rounded-lg max-h-72 mb-2" />
+            </template>
+            <div class="prose prose-invert max-w-none text-sm leading-relaxed" x-html="msg.html"></div>
+          </article>
+        </template>
+
+        <div x-show="loading" class="text-neutral-500 text-sm">思考中…</div>
+      </section>
+    </main>
+
+    <!-- Bottom action bar: camera + text input. -->
+    <footer class="fixed bottom-0 inset-x-0 border-t border-neutral-800 bg-neutral-950/95 backdrop-blur">
+      <div class="max-w-2xl mx-auto px-4 py-3 flex items-end gap-2">
+        <label class="tap-target rounded-full bg-neutral-800 flex items-center justify-center cursor-pointer">
+          <!-- accept + capture together: iOS Safari shows "Take Photo / Photo
+               Library / Choose File" sheet. -->
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            class="hidden"
+            @change="onPick($event)"
+          />
+          <span class="px-3 text-lg" x-data x-init="">📷</span>
+        </label>
+        <textarea
+          x-model="text"
+          @keydown.enter.prevent.exact="send()"
+          rows="1"
+          placeholder="问题（可选）—— 直接拍图也行"
+          class="flex-1 resize-none rounded-xl bg-neutral-800/60 px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-red-500/40"
+        ></textarea>
+        <button
+          class="tap-target rounded-full bg-red-600 px-4 text-sm font-medium disabled:opacity-50"
+          :disabled="loading || (!text.trim() && !pendingImage)"
+          @click="send()"
+        >
+          发送
+        </button>
+      </div>
+    </footer>
+  </body>
+</html>
