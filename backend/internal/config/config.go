@@ -55,7 +55,7 @@ func Load(configPath string) (*Config, error) {
 	viper.AutomaticEnv()
 
 	// 显式绑定敏感 key 到环境变量（优先级高于 yaml）
-	_ = viper.BindEnv("llm_api_key", "DASHSCOPE_API_KEY", "LLM_API_KEY")
+	_ = viper.BindEnv("llm_api_key", "DASHSCOPE_API_KEY", "QWEN_API_KEY", "LLM_API_KEY")
 	_ = viper.BindEnv("llm_api_url", "DASHSCOPE_API_URL", "LLM_API_URL")
 	_ = viper.BindEnv("llm_model", "LLM_MODEL")
 	_ = viper.BindEnv("vision_api_key", "VISION_API_KEY")

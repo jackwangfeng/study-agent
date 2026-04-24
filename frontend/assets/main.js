@@ -5,14 +5,17 @@
 // Keep the rendering pipeline simple: Markdown → HTML → KaTeX auto-render
 // (which picks up \( \) and \[ \] math AND \ce{...} thanks to mhchem).
 
-const API_BASE =
-  window.STUDY_AGENT_API_BASE ||
-  // Dev convenience: when serving via localhost:5173, the backend is
-  // assumed to be on :8000 of the same host. In prod, frontend + backend
-  // share the same origin (Cloudflare → origin :8000).
-  (location.hostname === "localhost" || location.hostname === "127.0.0.1"
-    ? "http://localhost:8000/v1"
-    : `${location.origin}/v1`);
+const API_BASE = (() => {
+  if (window.STUDY_AGENT_API_BASE) return window.STUDY_AGENT_API_BASE;
+  // Dev: backend assumed on :8000 of whatever host serves the frontend.
+  // Works for localhost AND LAN testing (iPad → Mac's 192.168.x.x:8000).
+  // In prod we'll set STUDY_AGENT_API_BASE explicitly via index.html so
+  // frontend on https://study.recompdaily.com calls https://api.../v1.
+  if (location.port === "5173" || location.port === "8888") {
+    return `http://${location.hostname}:8000/v1`;
+  }
+  return `${location.origin}/v1`;
+})();
 
 document.addEventListener("alpine:init", () => {
   Alpine.data("chemApp", () => ({

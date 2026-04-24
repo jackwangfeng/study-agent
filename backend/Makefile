@@ -1,54 +1,23 @@
-.PHONY: help local test build clean run-local run-prod
+.PHONY: help local build clean
 
-# 默认目标
 help:
 	@echo "可用命令:"
-	@echo "  make local    - 本地开发模式（测试模式，跳过验证码校验）"
-	@echo "  make test     - 运行测试"
-	@echo "  make build    - 编译生产版本"
-	@echo "  make clean    - 清理构建文件"
-	@echo "  make run      - 运行（默认本地模式）"
+	@echo "  make local  - 本地开发：source .env + go run（跳验证码、连本地 DB）"
+	@echo "  make build  - 编译生产二进制 → ./server"
+	@echo "  make clean  - 清理"
 
-# 本地开发模式（测试模式，跳过验证码）
+# 本地开发：从 .env 读 QWEN_API_KEY / DATABASE_URL / 等等。
+# .env 是 gitignored，自己维护。最少需要：
+#   QWEN_API_KEY=sk-...
+#   DATABASE_URL=postgresql://postgres:postgres@localhost:5434/study_agent?sslmode=disable
 local:
-	@echo "🚀 启动本地开发服务器（测试模式）..."
-	@echo "⚠️  注意：当前为测试模式，跳过验证码校验"
-	@SKIP_SMS_VERIFY=true go run cmd/server/main.go -config config.test.yaml
+	@if [ ! -f .env ]; then echo "❌ 缺 backend/.env，参见 README"; exit 1; fi
+	@echo "🚀 study-agent backend 本地启动"
+	@set -a && . ./.env && set +a && go run cmd/server/main.go -config config.test.yaml
 
-# 本地开发模式（启用 Gemini AI）
-# 需要先 export GEMINI_API_KEY=xxx；可选 VISION_API_KEY（默认复用 GEMINI_API_KEY）
-local-gemini:
-	@if [ -z "$$GEMINI_API_KEY" ]; then \
-		echo "❌ 缺少环境变量 GEMINI_API_KEY"; \
-		echo "   请先执行：export GEMINI_API_KEY=your-key"; \
-		exit 1; \
-	fi
-	@echo "🚀 启动本地开发服务器（Gemini AI 模式）..."
-	@echo "⚠️  注意：当前为测试模式，跳过验证码校验，启用 Gemini AI"
-	@SKIP_SMS_VERIFY=true go run cmd/server/main.go -config config.gemini.yaml
-
-# 运行测试
-test:
-	@echo "🧪 运行测试..."
-	@cd tests && ./run_api_tests.sh
-
-# 编译生产版本
 build:
-	@echo "🔨 编译生产版本..."
 	@go build -o server cmd/server/main.go
 	@echo "✅ 编译完成：./server"
 
-# 清理构建文件
 clean:
-	@echo "🧹 清理构建文件..."
-	@rm -f server main
-	@echo "✅ 清理完成"
-
-# 运行（默认本地模式）
-run: local
-
-# 生产模式（需要配置真实短信服务）
-run-prod:
-	@echo "🚀 启动生产服务器..."
-	@echo "⚠️  注意：生产模式需要配置真实的短信服务"
-	@./server -config config.yaml
+	@rm -f server

@@ -28,8 +28,14 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
     <!-- Marked: render the LLM's markdown reply (lists, bold, etc.). -->
     <script defer src="https://cdn.jsdelivr.net/npm/marked@13.0.3/marked.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <!-- main.js MUST come before alpine cdn — it registers Alpine.data via
+         the `alpine:init` event, which fires once Alpine boots. With deferred
+         scripts running in source order, putting main.js after alpine means
+         the listener attaches *after* `alpine:init` already fired and the
+         component is silently never registered (the symptom is "x-data does
+         nothing, buttons don't fire"). -->
     <script defer src="/assets/main.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
     <style>
       /* Tap-to-focus camera button on iOS Safari needs an explicit min size,
@@ -38,8 +44,8 @@
       body { background: #0e0e10; color: #e8e8ea; }
     </style>
   </head>
-  <body class="antialiased font-sans">
-    <main x-data="chemApp" class="max-w-2xl mx-auto px-4 pt-6 pb-32">
+  <body class="antialiased font-sans" x-data="chemApp">
+    <main class="max-w-2xl mx-auto px-4 pt-6 pb-32">
       <header class="flex items-center justify-between mb-6">
         <div>
           <div class="text-lg font-semibold tracking-tight">StudyAgent</div>
