@@ -1,0 +1,48 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+config.gemini.yaml
+config.dashscope.yaml
+client_secret_*.json
+
+# Go
+/backend/bin/
+/backend/tmp/
+*.exe
+vendor/
+
+# Flutter / Dart
+/frontend/.dart_tool/
+/frontend/.packages
+/frontend/build/
+/frontend/pubspec.lock
+/frontend/.flutter-plugins
+/frontend/.flutter-plugins-dependencies
+/frontend/ios/Pods/
+/frontend/ios/.symlinks/
+/frontend/ios/Flutter/Flutter.framework
+/frontend/ios/Flutter/Generated.xcconfig
+/frontend/ios/Flutter/flutter_export_environment.sh
+/frontend/android/.gradle/
+/frontend/android/local.properties
+/frontend/android/app/google-services.json
+
+# Logs
+*.log
+
+# Local-only deploy scripts (each contributor's own SSH config)
+/backend/deploy.sh
