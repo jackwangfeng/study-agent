@@ -15,7 +15,7 @@ test.describe.serial("study-agent PWA smoke", () => {
   test("page loads and header shows", async ({ page }) => {
     await page.goto("/");
     await expect(page).toHaveTitle(/StudyAgent/);
-    await expect(page.getByText("化学辅导 · 高二")).toBeVisible();
+    await expect(page.getByText("化学 · 高二")).toBeVisible();
   });
 
   test("alpine binds — send button enables once text is typed", async ({ page }) => {

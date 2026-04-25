@@ -23,6 +23,14 @@ document.addEventListener("alpine:init", () => {
     pendingImage: null, // base64 data URL of the photo waiting to be sent
     messages: [], // {role: "user"|"assistant", text, html, image?}
     loading: false,
+    // Empty-state quick prompts — give a 高二 student something concrete
+    // to tap so the first interaction is "this thing actually answered me",
+    // not "I have to think of a question myself".
+    quickPrompts: [
+      "什么是氧化还原反应？",
+      "Cu 被浓硝酸氧化方程式",
+      "乙醇怎么变乙酸？",
+    ],
 
     init() {
       // Re-render KaTeX whenever messages change. We listen on a custom
