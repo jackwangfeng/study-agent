@@ -49,5 +49,4 @@ vendor/
 /tests/test-results/
 /tests/playwright-report/
 
-# Local-only deploy scripts (each contributor's own SSH config)
-/backend/deploy.sh
+/tests/package-lock.json

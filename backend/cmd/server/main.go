@@ -69,6 +69,19 @@ func main() {
 		})
 	})
 
+	// Serve frontend static assets from the same origin as the API. Avoids
+	// CORS / cookie complications and keeps deployment to a single
+	// container. STATIC_DIR can override the path when developing locally.
+	staticDir := "/app/frontend"
+	if v := config.GetEnv("STATIC_DIR", ""); v != "" {
+		staticDir = v
+	}
+	r.Static("/assets", staticDir+"/assets")
+	r.Static("/icons", staticDir+"/icons")
+	r.StaticFile("/", staticDir+"/index.html")
+	r.StaticFile("/manifest.webmanifest", staticDir+"/manifest.webmanifest")
+	r.StaticFile("/sw.js", staticDir+"/sw.js")
+
 	// API v1 routes
 	v1 := r.Group("/v1")
 	{
